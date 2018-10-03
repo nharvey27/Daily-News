@@ -1,4 +1,5 @@
 import cx from 'classnames'
+import _ from 'lodash'
 import PropTypes from 'prop-types'
 import React from 'react'
 
@@ -7,15 +8,16 @@ import {
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
+  SUI,
+  useTextAlignProp,
 } from '../../lib'
 
 /**
  * A card can contain content metadata.
  */
 function CardMeta(props) {
-  const { children, className, content } = props
-  const classes = cx(className, 'meta')
+  const { children, className, content, textAlign } = props
+  const classes = cx(useTextAlignProp(textAlign), 'meta', className)
   const rest = getUnhandledProps(CardMeta, props)
   const ElementType = getElementType(CardMeta, props)
 
@@ -24,12 +26,6 @@ function CardMeta(props) {
       {childrenUtils.isNil(children) ? content : children}
     </ElementType>
   )
-}
-
-CardMeta._meta = {
-  name: 'CardMeta',
-  parent: 'Card',
-  type: META.TYPES.VIEW,
 }
 
 CardMeta.propTypes = {
@@ -44,6 +40,9 @@ CardMeta.propTypes = {
 
   /** Shorthand for primary content. */
   content: customPropTypes.contentShorthand,
+
+  /** A card meta can adjust its text alignment. */
+  textAlign: PropTypes.oneOf(_.without(SUI.TEXT_ALIGNMENTS, 'justified')),
 }
 
 export default CardMeta

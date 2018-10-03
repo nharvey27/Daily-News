@@ -1,4 +1,5 @@
 import cx from 'classnames'
+import _ from 'lodash'
 import PropTypes from 'prop-types'
 import React from 'react'
 
@@ -8,8 +9,9 @@ import {
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
+  SUI,
   useKeyOnly,
+  useTextAlignProp,
 } from '../../lib'
 import CardDescription from './CardDescription'
 import CardHeader from './CardHeader'
@@ -19,40 +21,36 @@ import CardMeta from './CardMeta'
  * A card can contain blocks of content or extra content meant to be formatted separately from the main content.
  */
 function CardContent(props) {
-  const {
-    children,
-    className,
-    description,
-    extra,
-    header,
-    meta,
-  } = props
+  const { children, className, content, description, extra, header, meta, textAlign } = props
 
-  const classes = cx(
-    className,
-    useKeyOnly(extra, 'extra'),
-    'content',
-  )
+  const classes = cx(useKeyOnly(extra, 'extra'), useTextAlignProp(textAlign), 'content', className)
   const rest = getUnhandledProps(CardContent, props)
   const ElementType = getElementType(CardContent, props)
 
   if (!childrenUtils.isNil(children)) {
-    return <ElementType {...rest} className={classes}>{children}</ElementType>
+    return (
+      <ElementType {...rest} className={classes}>
+        {children}
+      </ElementType>
+    )
+  }
+  if (!childrenUtils.isNil(content)) {
+    return (
+      <ElementType {...rest} className={classes}>
+        {content}
+      </ElementType>
+    )
   }
 
   return (
     <ElementType {...rest} className={classes}>
-      {createShorthand(CardHeader, val => ({ content: val }), header)}
-      {createShorthand(CardMeta, val => ({ content: val }), meta)}
-      {createShorthand(CardDescription, val => ({ content: val }), description)}
+      {createShorthand(CardHeader, val => ({ content: val }), header, { autoGenerateKey: false })}
+      {createShorthand(CardMeta, val => ({ content: val }), meta, { autoGenerateKey: false })}
+      {createShorthand(CardDescription, val => ({ content: val }), description, {
+        autoGenerateKey: false,
+      })}
     </ElementType>
   )
-}
-
-CardContent._meta = {
-  name: 'CardContent',
-  parent: 'Card',
-  type: META.TYPES.VIEW,
 }
 
 CardContent.propTypes = {
@@ -65,6 +63,9 @@ CardContent.propTypes = {
   /** Additional classes. */
   className: PropTypes.string,
 
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
+
   /** Shorthand for CardDescription. */
   description: customPropTypes.itemShorthand,
 
@@ -76,6 +77,9 @@ CardContent.propTypes = {
 
   /** Shorthand for CardMeta. */
   meta: customPropTypes.itemShorthand,
+
+  /** A card content can adjust its text alignment. */
+  textAlign: PropTypes.oneOf(_.without(SUI.TEXT_ALIGNMENTS, 'justified')),
 }
 
 export default CardContent
